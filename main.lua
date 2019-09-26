@@ -75,7 +75,7 @@ local function UpdateMacros()
                 local itemcount = GetItemCount(id)
                 local itemlevel = select(5, GetItemInfo(id))
                 -- print ("ID: " .. id .. ", Type: " .. type .. ",Rank: " .. rank .. ", Count: " .. itemcount)
-                if playerlevel >= itemlevel and (best[type][1] == nil or rank > best[type][1] or (rank == best[type][1] and itemcount < best[type][2])) then
+                if playerlevel >= itemlevel and (best[type][1] == nil or rank > best[type][2] or (rank == best[type][2] and itemcount < best[type][3])) then
                     -- print("Current best")
                     best[type] = {id, rank, itemcount}
                 end
