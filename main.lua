@@ -1,101 +1,31 @@
-local CONSUMABLES = {
-    ["FOOD"] = {
-        { 4536, 117, 787, 6290, 4604, 2681, 2070, 2679, 7097, 4540, 4656, 961, 5057, 16166, 19223, 17344 }, -- 61 hps
-        { 12238, 4592, 5095, 1326, 6890, 4537, 2287, 4605, 414, 4541, 5066, 17119, 6316, 16167, 19304, 18633 }, -- 243 hps
-        { 4593, 3770, 4606, 7228, 733, 4538, 5478, 422, 5526, 4542, 2685, 16170, 19305, 1119 }, -- 552 hps
-        { 3771, 8364, 4544, 4594, 4539, 4607, 1707, 18632, 6807, 16169, 8543, 17407, 19224 }, -- 874.8 hps
-        { 6887, 3927, 4599, 16766, 13546, 13930, 4608, 4602, 21552, 4601, 9681, 21030, 19306, 17408, 16168, 18635 }, -- 1392 hps
-        { 8952, 8950, 8932, 8957, 13935, 8948, 13933, 8953, 21031, 11444, 21033, 23160, 19225, 22324, 11415, 16171, 12763 }, -- 2148 hps
-        { 5349, 1113, 1114, 1487, 8075, 8076, 22895 } -- conjured
-    },
-    ["BUFF"] = {
-        { 2888, 5472, 6888, 2680, 12224, 17197, 17198, 11584, 5474, 7806, 7807, 7808, 17199 }, -- 2 stam/spi
-        { 2684, 5525, 2683, 2687, 3220, 5477, 724, 3662, 5476 }, -- 4 stam/spi
-        { 5527, 3665, 1017, 1082, 3666, 3726, 3664, 5480, 12209, 3663, 3727 }, -- 6 stam/spi
-        { 4457, 3729, 13851, 12213, 12214, 12210, 3728, 12212, 20074, 6038, 12211 }, -- 8 stam/spi
-        { 12218, 16971, 17222, 18045, 12216, 12215 } -- 12 stam/spi
-    },
-    ["DRINK"] = {
-        { 159 }, -- 151.2 mps
-        { 1179, 17404 }, -- 436.8 mps
-        { 1205, 9451, 19299 }, -- 835.2 mps
-        { 1708, 10841 }, -- 1344.6 mps
-        { 19300, 1645 }, -- 1992 mps
-        { 8766 }, -- 2934 mps
-        { 18300 }, -- 4200 mps
-        { 5350, 2288, 2136, 3772, 8077, 8078, 8079 } -- conjured
-    }
-}
+--[[ TODO
+    * Add configuration options
+        * Give option to treat buff food as low priority regular food
+        * Allow other buff foods (eg agi/str), and let user prioritize them
+        * Allow custom macro templates
+        * Prefer PVP potions/bandages in battlegrounds (they're ignored for now)
+]]
 
-local function Classify (id)
-    for consumableType, consumableLists in pairs(CONSUMABLES) do
-        for rank, consumables in ipairs(consumableLists) do
-            for subrank, consumableID in ipairs(consumables) do
-                if id == consumableID then
-                    if (consumableType == "FOOD" and rank == 7) or (consumableType == "DRINKS" and rank == 8) then
-                        return consumableType, rank + subrank
-                    else
-                        return consumableType, rank
-                    end
-                end
-            end
-        end
-    end
-    return nil, nil
-end
+local defaultFoodMacro = [[#showtooltip
+/use [nocombat,nomod] item:<food>
+/use [nocombat,mod:ctrl] item:<buffFood>
+/use [combat,nomod] item:<hPotion>
+/use [combat,mod:ctrl] item:<healthStone>
+/use [mod:shift] item:<bandage>
+]]
+local defaultDrinkMacro = [[#showtooltip
+/use [nocombat,nomod] item:<drink>
+/use [nocombat,mod:ctrl] item:<manaBuff>
+/use [combat,nomod] item:<mPotion>
+/use [combat,mod:ctrl] item:<manaGem>
+]]
 
-local function CreateOrUpdateMacro(macroName, nomodID, modID)
-    local macrotext = nil
-    if macroName == "NFB_Food" then
-        macrotext = string.format("#showtooltip\n/use [nomod] item:%d\n/use [mod] item:%d", nomodID, modID)
-    else
-        macrotext = string.format("#showtooltip\n/use item:%d", nomodID)
-    end
+local function CreateOrUpdateMacro(macroName, text)
     local macroID = GetMacroIndexByName(macroName)
     if macroID == 0 then
         CreateMacro(macroName, "Inv_misc_questionmark", macrotext, nil, nil)
     else
         EditMacro(macroID, macroName, "Inv_misc_questionmark", macrotext, nil, nil)
-    end
-end
-
-local function UpdateMacros()
-    local best = {
-        -- id, rank, count
-        ["FOOD"] = {},
-        ["BUFF"] = {},
-        ["DRINK"] = {}
-    }
-    local playerlevel = UnitLevel("player")
-    for bag = 0,4 do
-        for slot = 1,GetContainerNumSlots(bag) do
-            local id = GetContainerItemID(bag, slot)
-            local type, rank = Classify(id)
-            if type ~= nil then
-                local itemcount = GetItemCount(id)
-                local itemlevel = select(5, GetItemInfo(id))
-                -- print ("ID: " .. id .. ", Type: " .. type .. ",Rank: " .. rank .. ", Count: " .. itemcount)
-                if playerlevel >= itemlevel and (best[type][1] == nil or rank > best[type][2] or (rank == best[type][2] and itemcount < best[type][3])) then
-                    -- print("Current best")
-                    best[type] = {id, rank, itemcount}
-                end
-            end
-        end
-    end
-    CreateOrUpdateMacro("NFB_Food", best["FOOD"][1], best["BUFF"][1])
-    CreateOrUpdateMacro("NFB_Drink", best["DRINK"][1])
-end
-
-local function EventHandler(self, event, ...)
-    if event == "BAG_UPDATE_DELAYED" or event == "PLAYER_LEVEL_UP" then
-        if InCombatLockdown() then 
-            NeedsFoodBadly.dirty = true
-        else
-            UpdateMacros()
-        end
-    elseif event == "PLAYER_REGEN_ENABLED" and NeedsFoodBadly.dirty then
-        UpdateMacros()
-        NeedsFoodBadly.dirty = false
     end
 end
 
@@ -105,4 +35,234 @@ NeedsFoodBadly:RegisterEvent("PLAYER_REGEN_ENABLED")
 NeedsFoodBadly:RegisterEvent("PLAYER_LEVEL_UP")
 
 NeedsFoodBadly.dirty = false
-NeedsFoodBadly:SetScript("OnEvent", EventHandler)
+NeedsFoodBadly:SetScript("OnEvent", function (self, event, ...)
+    if event == "BAG_UPDATE_DELAYED" or event == "PLAYER_LEVEL_UP" then
+        if InCombatLockdown() then 
+            NeedsFoodBadly.dirty = true
+        else
+            NeedsFoodBadly:UpdateMacros()
+        end
+    elseif event == "PLAYER_REGEN_ENABLED" and NeedsFoodBadly.dirty then
+        NeedsFoodBadly:UpdateMacros()
+        NeedsFoodBadly.dirty = false
+    end
+end)
+
+function NeedsFoodBadly:UpdateMacros()
+    local best = {}
+    for bag = 0,4 do
+        for slot = 1,GetContainerNumSlots(bag) do
+            local id = GetContainerItemID(bag, slot)
+            best.food = self:BetterFood(best.food, self.Food[id])
+            best.buffFood = self:BetterBuffFood(best.buffFood, self.Food[id])
+            best.drink = self:BetterDrink(best.drink, self.Food[id])
+            best.buffDrink = self:BetterBuffDrink(best.buffDrink, self.Food[id])
+            best.hPotion = self:BetterHPotion(best.hPotion, self.Potion[id])
+            best.mPotion = self:BetterMPotion(best.mPotion, self.Potion[id])
+            best.bandage = self:BetterBandage(best.bandage, self.Bandage[id])
+            best.healthstone = self:BetterHealthstone(best.healthstone, self.Healthstone[id])
+            best.manaGem = self:BetterManaGem(best.manaGem, self.ManaGem[id])
+        end
+    end
+    foodMacro = defaultFoodMacro:gsub("<%a+>", {
+        ["<food>"] = (best.food and best.food.id or 0),
+        ["<buffFood>"] = (best.buffFood and best.buffFood.id or 0),
+        ["<hPotion>"] = (best.hPotion and best.hPotion.id or 0),
+        ["<healthStone>"] = (best.healthStone and best.healthStone.id or 0),
+        ["<bandage>"] = (best.bandage and best.bandage.id or 0),
+    })
+    drinkMacro = defaultDrinkMacro:gsub("<%a+>", {
+        ["<drink>"] = (best.drink and best.drink.id or 0),
+        ["<manaBuff>"] = (best.buffDrink and best.buffDrink.id or 0),
+        ["<mPotion>"] = (best.mPotion and best.mPotion.id or 0),
+        ["<manaGem>"] = (best.manaGem and best.manaGem.id or 0),
+    })
+    CreateOrUpdateMacro("NFB_Food", best.food, best.buffFood)
+    CreateOrUpdateMacro("NFB_Drink", best.drink)
+end
+
+function NeedsFoodBadly:IsUsableFood(food)
+    return food 
+            and food.lvl <= UnitLevel("player")
+            and food.hp 
+            and not (food.hp5 or food.mp5 or food.str or food.agi or food.stam or food.int or food.spi)
+end
+
+function NeedsFoodBadly:BetterFood(a, b)
+    if not self:IsUsableFood(a) then a = nil end
+    if not self:IsUsableFood(b) then b = nil end
+    if a == nil or b == nil then
+        return a or b
+    end
+    if a.conj and not b.conj then
+        return a
+    elseif b.conj and not a.conj then
+        return b
+    end
+    -- Percent food is stored as a decimal number, ie "Restores 2% health" is hp=0.02
+    a_hp, b_hp = a.hp, b.hp
+    if a_hp < 1 then a_hp = UnitHealthMax("player") * a_hp end
+    if b_hp < 1 then b_hp = UnitHealthMax("player") * b_hp end
+    if a_hp > b_hp or (a_hp == b_hp and GetItemCount(a.id) <= GetItemCount(b.id)) then
+        return a
+    elseif b_hp > a_hp or (b_hp == a_hp and GetItemCount(b.id) <= GetItemCount(a.id)) then
+        return b
+    end
+end
+
+function NeedsFoodBadly:IsUsableBuffFood(food)
+    return food 
+        and food.lvl <= UnitLevel("player")
+        and food.hp and food.stam and food.spi
+end
+
+function NeedsFoodBadly:BetterBuffFood(a, b)
+    if not self:IsUsableBuffFood(a) then a = nil end
+    if not self:IsUsableBuffFood(b) then b = nil end
+    if a == nil or b == nil then
+        return a or b
+    end
+    if a.stam > b.stam or (a.stam == b.stam and GetItemCount(a.id) <= GetItemCount(b.id)) then
+        return a
+    elseif b.stam > a.stam or (b.stam == a.stam and GetItemCount(b.id) <= GetItemCount(a.id)) then
+        return b
+    end
+end
+
+function NeedsFoodBadly:IsUsableDrink(food)
+    return food 
+            and food.lvl <= UnitLevel("player")
+            and food.mp
+            and not food.mp5
+end
+
+function NeedsFoodBadly:BetterDrink(a, b)
+    if not self:IsUsableDrink(a) then a = nil end
+    if not self:IsUsableDrink(b) then b = nil end
+    if a == nil or b == nil then
+        return a or b
+    end
+    if a.conj and not b.conj then
+        return a
+    elseif b.conj and not a.conj then
+        return b
+    end
+    a_mp, b_mp = a.mp, b.mp
+    if a_mp < 1 then a_mp = UnitHealthMax("player") * a_mp end
+    if b_mp < 1 then b_mp = UnitHealthMax("player") * b_mp end
+    if a_mp > b_mp or (a_mp == b_mp and GetItemCount(a.id) <= GetItemCount(b.id)) then
+        return a
+    elseif b_mp > a_mp or (b_mp == a_mp and GetItemCount(b.id) <= GetItemCount(a.id)) then
+        return b
+    end
+end
+
+function NeedsFoodBadly:IsUsableBuffDrink(food)
+    return food 
+            and food.lvl <= UnitLevel("player")
+            and food.mp5
+end
+
+function NeedsFoodBadly:BetterBuffDrink(a, b)
+    if not self:IsUsableBuffDrink(a) then a = nil end
+    if not self:IsUsableBuffDrink(b) then b = nil end
+    if a == nil or b == nil then
+        return a or b
+    end
+    if a.mp5 > b.mp5 or (a.mp5 == b.mp5 and GetItemCount(a.id) <= GetItemCount(b.id)) then
+        return a
+    elseif b.mp5 > a.mp5 or (b.mp5 == a.mp5 and GetItemCount(b.id) <= GetItemCount(a.id)) then
+        return b
+    end
+end
+
+function NeedsFoodBadly:IsUsableHPotion(potion)
+    return potion 
+            and potion.lvl <= UnitLevel("player")
+            and potion.hp
+            and not potion.bg
+end
+
+function NeedsFoodBadly:BetterHPotion(a, b)
+    if not self:IsUsableHPotion(a) then a = nil end
+    if not self:IsUsableHPotion(b) then b = nil end
+    if a == nil or b == nil then
+        return a or b
+    end
+    if a.high >= b.high then
+        return a
+    else
+        return b
+    end
+end
+
+function NeedsFoodBadly:IsUsableMPotion(potion)
+    return potion 
+            and potion.lvl <= UnitLevel("player")
+            and potion.mp
+            and not potion.bg
+end
+
+function NeedsFoodBadly:BetterMPotion(a, b)
+    if not self:IsUsableMPotion(a) then a = nil end
+    if not self:IsUsableMPotion(b) then b = nil end
+    if a == nil or b == nil then
+        return a or b
+    end
+    if a.high >= b.high then
+        return a
+    else
+        return b
+    end
+end
+
+function NeedsFoodBadly:IsUsableBandage(bandage)
+    return bandage and bandage.skill <= 300 and not bandage.bg
+end
+
+function NeedsFoodBadly:BetterBandage(a, b)
+    if not self:IsUsableBandage(a) then a = nil end
+    if not self:IsUsableBandage(b) then b = nil end
+    if a == nil or b == nil then
+        return a or b
+    end
+    if a.hp >= b.hp then
+        return a
+    else
+        return b
+    end
+end
+
+function NeedsFoodBadly:IsUsableHealthstone(healthstone)
+    return healthstone and healthstone.lvl <= UnitLevel("player")
+end
+
+function NeedsFoodBadly:BetterHealthstone(a, b)
+    if not self:IsUsableHealthstone(a) then a = nil end
+    if not self:IsUsableHealthstone(b) then b = nil end
+    if a == nil or b == nil then
+        return a or b
+    end
+    if a.hp >= b.hp then
+        return a
+    else
+        return b
+    end
+end
+
+function NeedsFoodBadly:IsUsableManaGem(manaGem)
+    return manaGem and manaGem.lvl <= UnitLevel("player")
+end
+
+function NeedsFoodBadly:BetterManaGem(a, b)
+    if not self:IsUsableManaGem(a) then a = nil end
+    if not self:IsUsableManaGem(b) then b = nil end
+    if a == nil or b == nil then
+        return a or b
+    end
+    if a.high >= b.high then
+        return a
+    else
+        return b
+    end
+end

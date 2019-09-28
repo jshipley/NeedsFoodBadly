@@ -1,6 +1,8 @@
 ## Interface: 11302
 ## Title: Needs Food Badly
 ## Author: Jeff Shipley
-## Version: 0.1
+## Version: 0.3
 
 main.lua
+data.lua
+tests.lua
