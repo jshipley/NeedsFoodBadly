@@ -50,7 +50,6 @@ def _dist():
         os.mkdir('dist')
     for f in files:
         shutil.copy(f, 'dist')
-    print(TESTING)
     if TESTING:
         for f in testfiles:
             shutil.copy(f, 'dist')
