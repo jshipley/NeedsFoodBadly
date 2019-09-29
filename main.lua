@@ -7,25 +7,25 @@
 ]]
 
 local defaultFoodMacro = [[#showtooltip
-/use [nocombat,nomod] item:<food>
-/use [nocombat,mod:ctrl] item:<buffFood>
 /use [combat,nomod] item:<hPotion>
 /use [combat,mod:ctrl] item:<healthStone>
+/use [nocombat,mod:ctrl] item:<buffFood>
 /use [mod:shift] item:<bandage>
+/use [nocombat] item:<food>
 ]]
 local defaultDrinkMacro = [[#showtooltip
-/use [nocombat,nomod] item:<drink>
-/use [nocombat,mod:ctrl] item:<manaBuff>
 /use [combat,nomod] item:<mPotion>
 /use [combat,mod:ctrl] item:<manaGem>
+/use [nocombat,mod:ctrl] item:<manaBuff>
+/use [nocombat] item:<drink>
 ]]
 
 local function CreateOrUpdateMacro(macroName, text)
     local macroID = GetMacroIndexByName(macroName)
     if macroID == 0 then
-        CreateMacro(macroName, "Inv_misc_questionmark", macrotext, nil, nil)
+        CreateMacro(macroName, "Inv_misc_questionmark", text, nil, nil)
     else
-        EditMacro(macroID, macroName, "Inv_misc_questionmark", macrotext, nil, nil)
+        EditMacro(macroID, macroName, "Inv_misc_questionmark", text, nil, nil)
     end
 end
 
@@ -77,8 +77,8 @@ function NeedsFoodBadly:UpdateMacros()
         ["<mPotion>"] = (best.mPotion and best.mPotion.id or 0),
         ["<manaGem>"] = (best.manaGem and best.manaGem.id or 0),
     })
-    CreateOrUpdateMacro("NFB_Food", best.food, best.buffFood)
-    CreateOrUpdateMacro("NFB_Drink", best.drink)
+    CreateOrUpdateMacro("NFB_Food", foodMacro)
+    CreateOrUpdateMacro("NFB_Drink", drinkMacro)
 end
 
 function NeedsFoodBadly:IsUsableFood(food)
