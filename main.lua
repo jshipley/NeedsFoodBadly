@@ -216,8 +216,18 @@ function NeedsFoodBadly:BetterMPotion(a, b)
     end
 end
 
+local function FirstAidSkillPoints()
+    for i = 1, GetNumSkillLines() do
+        local skillName, _, _, skillRank, numTempPoints, skillModifier = GetSkillLineInfo(i)
+        if skillName == PROFESSIONS_FIRST_AID then
+            return skillRank + numTempPoints + skillModifier
+        end
+    end
+    return 0
+end
+
 function NeedsFoodBadly:IsUsableBandage(bandage)
-    return bandage and bandage.skill <= 300 and not bandage.bg
+    return bandage and bandage.skill <= FirstAidSkillPoints() and not bandage.bg
 end
 
 function NeedsFoodBadly:BetterBandage(a, b)
