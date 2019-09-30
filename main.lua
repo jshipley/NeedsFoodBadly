@@ -11,13 +11,13 @@ local defaultFoodMacro = [[#showtooltip
 /use [combat,mod:ctrl] item:<healthStone>
 /use [nocombat,mod:ctrl] item:<buffFood>
 /use [mod:shift] item:<bandage>
-/use [nocombat] item:<food>
+/use [nocombat,nomod] item:<food>
 ]]
 local defaultDrinkMacro = [[#showtooltip
 /use [combat,nomod] item:<mPotion>
 /use [combat,mod:ctrl] item:<manaGem>
 /use [nocombat,mod:ctrl] item:<manaBuff>
-/use [nocombat] item:<drink>
+/use [nocombat,nomod] item:<drink>
 ]]
 
 local function CreateOrUpdateMacro(macroName, text)
