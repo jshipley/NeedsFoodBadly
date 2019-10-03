@@ -8,15 +8,9 @@ from pynt import task
 
 ADDON_DIR = r'C:/Program Files (x86)/World of Warcraft/_classic_/Interface/AddOns/NeedsFoodBadly'
 
-TESTING = False
 VERSION = None
 
 interface = '11302'
-files = [
-    'main.lua',
-    'data.lua'
-]
-testfiles = ['tests.lua']
 
 @task()
 def clean():
@@ -30,9 +24,9 @@ def v(version):
     VERSION = version
 
 @task()
-def test():
-    global TESTING
-    TESTING = True
+def tests():
+    if os.system('busted') > 0:
+        raise Exception('unit tests failed')
 
 @task(v)
 def toc():
@@ -42,36 +36,30 @@ def toc():
     with open(os.path.join('dist', 'NeedsFoodBadly.toc'), 'w') as tocfile:
         tocfile.write(FileSystemLoader('.')
             .load(Environment(trim_blocks=True), 'NeedsFoodBadly.toc.j2')
-            .render(interface=interface, version=VERSION, files=files, testfiles=testfiles if TESTING else []))
+            .render(interface=interface, version=VERSION))
 
 @task(clean, toc)
 def _dist():
     if not os.path.isdir('dist'):
         os.mkdir('dist')
-    for f in files:
+    for f in glob.glob('*.lua'):
         shutil.copy(f, 'dist')
-    if TESTING:
-        for f in testfiles:
-            shutil.copy(f, 'dist')
+    shutil.copy('README.md', 'dist')
 
-def _distfiles():
-    return ['NeedsFoodBadly.toc'] + files + (testfiles if TESTING else [])
-
-@task(_dist, v)
+@task(tests, v, _dist)
 def zipfile():
     z = ZipFile(os.path.join('dist', 'NeedsFoodBadly-{}.zip'.format(VERSION)), 'w')
-    for f in _distfiles():
-        z.write(os.path.join('dist', f), os.path.join('NeedsFoodBadly', f))
+    for f in glob.glob(os.path.join('dist', '*')):
+        if os.path.splitext(f)[1] == '.zip':
+            continue
+        z.write(f, os.path.join('NeedsFoodBadly', os.path.relpath(f, 'dist')))
 
 @task(_dist)
 def local():
-    if TESTING:
-        print('  Copying NeedsFoodBadly to Interface/Addons -- TEST MODE')
-    else:
-        print('  Copying NeedsFoodBadly to Interface/Addons')
+    print('  Copying NeedsFoodBadly to Interface/Addons')
     if not os.path.isdir(ADDON_DIR):
         os.makedirs(ADDON_DIR)
     for f in glob.glob(os.path.join(ADDON_DIR, '*')):
         os.remove(f)
-    for f in _distfiles():
-        shutil.copy(os.path.join('dist', f), ADDON_DIR)
+    for f in glob.glob(os.path.join('dist', '*')):
+        shutil.copy(f, ADDON_DIR)

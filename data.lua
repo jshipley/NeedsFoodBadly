@@ -230,32 +230,6 @@ NeedsFoodBadly.Potion = {
     [17349]={id=17349, name="Superior Healing Draught", lvl=35, low=560, high=720, hp=true, bg=true},
     [17352]={id=17352, name="Superior Mana Draught", lvl=35, low=560, high=720, mp=true, bg=true}
 }
-NeedsFoodBadly.Bandage = {
-    [8545]={id=8545, name="Heavy Mageweave Bandage", skill=175, hp=1104},
-    [14529]={id=14529, name="Runecloth Bandage", skill=200, hp=1360},
-    [14530]={id=14530, name="Heavy Runecloth Bandage", skill=225, hp=2000},
-    [6450]={id=6450, name="Silk Bandage", skill=100, hp=400},
-    [6451]={id=6451, name="Heavy Silk Bandage", skill=125, hp=640},
-    [8544]={id=8544, name="Mageweave Bandage", skill=150, hp=800},
-    [3530]={id=3530, name="Wool Bandage", skill=50, hp=161},
-    [3531]={id=3531, name="Heavy Wool Bandage", skill=75, hp=301},
-    [2581]={id=2581, name="Heavy Linen Bandage", skill=20, hp=114},
-    [1251]={id=1251, name="Linen Bandage", skill=1, hp=66},
-    [19307]={id=19307, name="Alterac Heavy Runecloth Bandage", skill=225, hp=2000},
-    [23684]={id=23684, name="Crystal Infused Bandage", skill=225, hp=2500},
-    [19068]={id=19068, name="Warsong Gulch Silk Bandage", lvl=25, skill=125, hp=640,bg=2},
-    [19067]={id=19067, name="Warsong Gulch Mageweave Bandage", lvl=35, skill=175, hp=1104,bg=2},
-    [19066]={id=19066, name="Warsong Gulch Runecloth Bandage", lvl=45, skill=225, hp=2000,bg=2},
-    [20067]={id=20067, name="Arathi Basin Silk Bandage", lvl=25, skill=125, hp=640,bg=3},
-    [20235]={id=20235, name="Defiler's Silk Bandage", lvl=25, skill=125, hp=640,bg=3},
-    [20244]={id=20244, name="Highlander's Silk Bandage", lvl=25, skill=125, hp=640,bg=3},
-    [20065]={id=20065, name="Arathi Basin Mageweave Bandage", lvl=35, skill=175, hp=1104,bg=3},
-    [20232]={id=20232, name="Defiler's Mageweave Bandage", lvl=35, skill=175, hp=1104,bg=3},
-    [20237]={id=20237, name="Highlander's Mageweave Bandage", lvl=35, skill=175, hp=1104,bg=3},
-    [20066]={id=20066, name="Arathi Basin Runecloth Bandage", lvl=45, skill=225, hp=2000,bg=3},
-    [20234]={id=20234, name="Defiler's Runecloth Bandage", lvl=45, skill=225, hp=2000,bg=3},
-    [20243]={id=20243, name="Highlander's Runecloth Bandage", lvl=45, skill=225, hp=2000,bg=3}
-}
 NeedsFoodBadly.Healthstone = {
     [19004]={id=19004, name="Minor Healthstone", lvl=10, hp=110},
     [19005]={id=19005, name="Minor Healthstone", lvl=10, hp=120},
@@ -278,4 +252,30 @@ NeedsFoodBadly.ManaGem = {
     [5513]={id=5513, name="Mana Jade", lvl=38, low=550, high=650},
     [8007]={id=8007, name="Mana Citrine", lvl=48, low=775, high=925},
     [8008]={id=8008, name="Mana Ruby", lvl=58, low=1000, high=1200}
+}
+NeedsFoodBadly.Bandage = {
+    [8545]={id=8545, name="Heavy Mageweave Bandage", skill=175, hp=1104},
+    [14529]={id=14529, name="Runecloth Bandage", skill=200, hp=1360},
+    [14530]={id=14530, name="Heavy Runecloth Bandage", skill=225, hp=2000},
+    [6450]={id=6450, name="Silk Bandage", skill=100, hp=400},
+    [6451]={id=6451, name="Heavy Silk Bandage", skill=125, hp=640},
+    [8544]={id=8544, name="Mageweave Bandage", skill=150, hp=800},
+    [3530]={id=3530, name="Wool Bandage", skill=50, hp=161},
+    [3531]={id=3531, name="Heavy Wool Bandage", skill=75, hp=301},
+    [2581]={id=2581, name="Heavy Linen Bandage", skill=20, hp=114},
+    [1251]={id=1251, name="Linen Bandage", skill=1, hp=66},
+    [19307]={id=19307, name="Alterac Heavy Runecloth Bandage", skill=225, hp=2000},
+    [23684]={id=23684, name="Crystal Infused Bandage", skill=225, hp=2500},
+    [19068]={id=19068, name="Warsong Gulch Silk Bandage", lvl=25, skill=125, hp=640, bg=2},
+    [19067]={id=19067, name="Warsong Gulch Mageweave Bandage", lvl=35, skill=175, hp=1104, bg=2},
+    [19066]={id=19066, name="Warsong Gulch Runecloth Bandage", lvl=45, skill=225, hp=2000, bg=2},
+    [20067]={id=20067, name="Arathi Basin Silk Bandage", lvl=25, skill=125, hp=640, bg=3},
+    [20235]={id=20235, name="Defiler's Silk Bandage", lvl=25, skill=125, hp=640, bg=3},
+    [20244]={id=20244, name="Highlander's Silk Bandage", lvl=25, skill=125, hp=640, bg=3},
+    [20065]={id=20065, name="Arathi Basin Mageweave Bandage", lvl=35, skill=175, hp=1104, bg=3},
+    [20232]={id=20232, name="Defiler's Mageweave Bandage", lvl=35, skill=175, hp=1104, bg=3},
+    [20237]={id=20237, name="Highlander's Mageweave Bandage", lvl=35, skill=175, hp=1104, bg=3},
+    [20066]={id=20066, name="Arathi Basin Runecloth Bandage", lvl=45, skill=225, hp=2000, bg=3},
+    [20234]={id=20234, name="Defiler's Runecloth Bandage", lvl=45, skill=225, hp=2000, bg=3},
+    [20243]={id=20243, name="Highlander's Runecloth Bandage", lvl=45, skill=225, hp=2000, bg=3}
 }
