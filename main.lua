@@ -7,17 +7,12 @@
 ]]
 
 local defaultFoodMacro = [[#showtooltip
-/use [combat,nomod] item:<hPotion>
-/use [combat,mod:ctrl] item:<healthStone>
-/use [nocombat,mod:ctrl] item:<buffFood>
-/use [mod:shift] item:<bandage>
-/use [nocombat,nomod] item:<food>
+/use [mod:shift]<bandage>;[nocombat,mod]<buffFood>;[nocombat]<food>
+/castsequence [combat]<hPotions>
 ]]
 local defaultDrinkMacro = [[#showtooltip
-/use [combat,nomod] item:<mPotion>
-/use [combat,mod:ctrl] item:<manaGem>
-/use [nocombat,mod:ctrl] item:<manaBuff>
-/use [nocombat,nomod] item:<drink>
+/use [nocombat,mod]<manaBuff>;[nocombat]<drink>
+/castsequence [combat]<mPotions>
 ]]
 
 local function CreateOrUpdateMacro(macroName, text)
@@ -57,31 +52,31 @@ function NeedsFoodBadly:UpdateMacros()
     for bag = 0,4 do
         for slot = 1,GetContainerNumSlots(bag) do
             local id = GetContainerItemID(bag, slot)
-            if not best.food[id] and IsUsableFood(self.Food[id]) then
+            if not best.food[id] and self:IsUsableFood(self.Food[id]) then
                 best.food[id] = self.Food[id]
             end
-            if not best.buffFood[id] and IsUsableBuffFood(self.Food[id]) then
+            if not best.buffFood[id] and self:IsUsableBuffFood(self.Food[id]) then
                 best.buffFood[id] = self.Food[id]
             end
-            if not best.drink[id] and IsUsableDrink(self.Food[id]) then
+            if not best.drink[id] and self:IsUsableDrink(self.Food[id]) then
                 best.drink[id] = self.Food[id]
             end
-            if not best.buffDrink[id] and IsUsableBuffDrink(self.Food[id]) then
+            if not best.buffDrink[id] and self:IsUsableBuffDrink(self.Food[id]) then
                 best.buffDrink[id] = self.Food[id]
             end
-            if not best.hPotion[id] and IsUsableHPotion(self.Potion[id]) then
+            if not best.hPotion[id] and self:IsUsableHPotion(self.Potion[id]) then
                 best.hPotion[id] = self.Potion[id]
             end
-            if not best.mPotion[id] and IsUsableMPotion(self.Potion[id]) then
+            if not best.mPotion[id] and self:IsUsableMPotion(self.Potion[id]) then
                 best.mPotion[id] = self.Potion[id]
             end
-            if not best.healthstone[id] and IsUsableHealthstone(self.healthstone[id]) then
+            if not best.healthstone[id] and self:IsUsableHealthstone(self.Healthstone[id]) then
                 best.healthstone[id] = self.Healthstone[id]
             end
-            if not best.manaGem[id] and IsUsableManaGem(self.ManaGem[id]) then
+            if not best.manaGem[id] and self:IsUsableManaGem(self.ManaGem[id]) then
                 best.manaGem[id] = self.ManaGem[id]
             end
-            if not best.bandage[id] and IsUsableBandage(self.Bandage[id]) then
+            if not best.bandage[id] and self:IsUsableBandage(self.Bandage[id]) then
                 best.bandage[id] = self.Bandage[id]
             end
         end
@@ -92,19 +87,19 @@ function NeedsFoodBadly:UpdateMacros()
     best.buffDrink = self:Sorted(best.buffDrink, self.BetterBuffDrink)
     best.hPotion = self:Sorted(best.hPotion, self.BetterHPotion)
     best.mPotion = self:Sorted(best.mPotion, self.BetterMPotion)
+    best.healthstone = self:Sorted(best.healthstone, self.BetterHealthstone)
+    best.manaGem = self:Sorted(best.manaGem, self.BetterManaGem)
     best.bandage = self:Sorted(best.bandage, self.BetterBandage)
     foodMacro = defaultFoodMacro:gsub("<%a+>", {
-        ["<food>"] = (best.food[1] and best.food[1].id or 0),
-        ["<buffFood>"] = (best.buffFood[1] and best.buffFood[1].id or 0),
-        ["<hPotion>"] = (best.hPotion[1] and best.hPotion[1].id or 0),
-        ["<healthStone>"] = (best.healthStone[1] and best.healthStone[1].id or 0),
-        ["<bandage>"] = (best.bandage[1] and best.bandage[1].id or 0),
+        ["<food>"] = 'item:'..tostring(best.food[1] and best.food[1].id or 0),
+        ["<buffFood>"] = 'item:'..tostring(best.buffFood[1] and best.buffFood[1].id or 0),
+        ["<bandage>"] = 'item:'..tostring(best.bandage[1] and best.bandage[1].id or 0),
+        ["<hPotions>"] = self:BuildSequence(best.healthstone, best.hPotion)
     })
     drinkMacro = defaultDrinkMacro:gsub("<%a+>", {
-        ["<drink>"] = (best.drink[1] and best.drink[1].id or 0),
-        ["<manaBuff>"] = (best.buffDrink[1] and best.buffDrink[1].id or 0),
-        ["<mPotion>"] = (best.mPotion[1] and best.mPotion[1].id or 0),
-        ["<manaGem>"] = (best.manaGem[1] and best.manaGem[1].id or 0),
+        ["<drink>"] = 'item:'..tostring(best.drink[1] and best.drink[1].id or 0),
+        ["<manaBuff>"] = 'item:'..tostring(best.buffDrink[1] and best.buffDrink[1].id or 0),
+        ["<mPotions>"] = self:BuildSequence(best.manaGem, best.mPotion)
     })
     CreateOrUpdateMacro("NFB_Food", foodMacro)
     CreateOrUpdateMacro("NFB_Drink", drinkMacro)
@@ -112,7 +107,7 @@ end
 
 function NeedsFoodBadly:Sorted(t, f)
     sortedTable = {}
-    for _, v in t do
+    for _, v in pairs(t) do
         table.insert(sortedTable, v)
     end
     table.sort(sortedTable, f)
@@ -241,4 +236,16 @@ function NeedsFoodBadly.BetterBandage(a, b)
         return false
     end
     return a.hp >= b.hp
+end
+
+function NeedsFoodBadly:BuildSequence(stone, potions)
+    local sequence = {}
+    if stone[1] then table.insert(sequence, 'item:'..tostring(stone[1].id)) end
+    for _, potion in pairs(potions) do
+        for _ = 1,GetItemCount(potion.id) do
+            table.insert(sequence, 'item:'..tostring(potion.id))
+        end
+    end
+    sequenceStr = table.concat(sequence, ',', 1, math.min(table.getn(sequence), 14))
+    return sequenceStr
 end

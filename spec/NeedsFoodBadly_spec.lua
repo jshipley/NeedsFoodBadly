@@ -262,3 +262,25 @@ describe("#better", function ()
         end)
     end)
 end)
+describe("#sequence", function ()
+    setup(function ()
+        _G.GetItemCount = function (id)
+            if     id == 13446 then return 1
+            elseif id == 929 then return 2
+            elseif id == 118 then return 3
+            else return 30 end
+        end
+    end)
+    it("should build a list of #potion and #healthstone", function ()
+        assert.same(NFB:BuildSequence({NFB.Healthstone[19004]}, {NFB.Potion[13446], NFB.Potion[929], NFB.Potion[118]}),
+            "item:19004,item:13446,item:929,item:929,item:118,item:118,item:118")
+    end)
+    it("should work with just #potion", function ()
+        assert.same(NFB:BuildSequence({}, {NFB.Potion[13446], NFB.Potion[929], NFB.Potion[118]}),
+            "item:13446,item:929,item:929,item:118,item:118,item:118")
+    end)
+    it("should truncate the list at 14 items", function ()
+        assert.same(NFB:BuildSequence({}, {NFB.Potion[3928]}),
+            "item:3928,item:3928,item:3928,item:3928,item:3928,item:3928,item:3928,item:3928,item:3928,item:3928,item:3928,item:3928,item:3928,item:3928")
+    end)
+end)

@@ -1,0 +1,23 @@
+---
+kind: pipeline
+type: exec
+name: build
+
+platform:
+  os: linux
+  arch: arm
+
+steps:
+- name: test
+  commands:
+  - ./build.sh test
+- name: dist
+  commands:
+  - ./build.sh dist
+- name: package
+  commands:
+  - ./build.sh package
+- name: archive
+  commands:
+  - ./build.sh archive
+
