@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 
 if [[ -n "$DRONE_TAG" ]]; then
 	VERSION="${DRONE_TAG##v}"
